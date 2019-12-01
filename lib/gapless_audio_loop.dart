@@ -12,16 +12,19 @@ class GaplessAudioLoop {
   /// A reference to the loaded file.
   String _loadedFile;
   int _id;
-  double _volume = 1.0;
+  double _volumeleft = 1.0;
+  double _volumeright = 1.0;
 
-  double get volume => _volume;
+  double get volumeleft => _volumeleft;
+  double get volumeright => _volumeright;
 
-  void setVolume(double volume) async {
-    _volume = volume;
+  void setVolume(double volumeleft, double volumeright) async {
+    _volumeleft = volumeleft;
+    _volumeright = volumeright;
 
     if (_id != null) {
       await _channel
-          .invokeMethod("setVolume", {'playerId': _id, "volume": _volume});
+          .invokeMethod("setVolume", {'playerId': _id, "volumeleft": _volumeleft, "volumeright": _volumeright});
     }
   }
 
@@ -57,7 +60,7 @@ class GaplessAudioLoop {
     // Do nothing when it  is already playing
     if (_id == null) {
       _id = await _channel
-          .invokeMethod("play", {'url': _loadedFile, 'volume': _volume});
+          .invokeMethod("play", {'url': _loadedFile, 'volumeleft': _volumeleft, 'volumeright': _volumeright});
     }
   }
 

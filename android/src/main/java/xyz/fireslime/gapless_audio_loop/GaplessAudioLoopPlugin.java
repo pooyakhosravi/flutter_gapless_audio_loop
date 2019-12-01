@@ -17,16 +17,20 @@ class GaplessPlayer {
     private MediaPlayer nextPlayer = null;
 
     private String url;
-    private double volume;
+    private double volumeleft;
+    private double volumeright;
+    private boolean stopplaying;
 
-    GaplessPlayer(String url, double volume) {
+    GaplessPlayer(String url, double volumeleft, double  volumeright) {
         this.url = url;
-        this.volume = volume;
+        this.volumeleft = volumeleft;
+        this.volumeright = volumeright;
+        this.stopplaying = false;
 
         try {
             currentPlayer = new MediaPlayer();
             currentPlayer.setDataSource(url);
-            currentPlayer.setVolume((float) volume, (float) volume);
+            currentPlayer.setVolume((float) volumeleft, (float) volumeright);
             currentPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mediaPlayer) {
@@ -40,21 +44,27 @@ class GaplessPlayer {
         }
     }
 
-    public void setVolume(double volume) {
-        this.volume = volume;
+    public void setVolume(double volumeleft, double volumeright) {
+        this.volumeleft = volumeleft;
+        this.volumeright = volumeright;
+
         if (currentPlayer != null) {
-            currentPlayer.setVolume((float) volume, (float) volume);
+            currentPlayer.setVolume((float) volumeleft, (float) volumeright);
         }
         if (nextPlayer != null) {
-            nextPlayer.setVolume((float) volume, (float) volume);
+            nextPlayer.setVolume((float) volumeleft, (float) volumeright);
         }
     }
 
     private void createNextMediaPlayer() {
+        if (this.stopplaying){
+            stop();
+            return;
+        }
         nextPlayer = new MediaPlayer();
         try {
             nextPlayer.setDataSource(url);
-            nextPlayer.setVolume((float) volume, (float) volume);
+            nextPlayer.setVolume((float) volumeleft, (float) volumeright);
             nextPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
@@ -80,6 +90,7 @@ class GaplessPlayer {
             };
 
     public void stop() {
+        this.stopplaying = true;
         currentPlayer.stop();
         if (nextPlayer != null) {
             nextPlayer.stop();
@@ -87,10 +98,15 @@ class GaplessPlayer {
     }
 
     public void pause() {
+        this.stopplaying = true;
         currentPlayer.pause();
+        if (nextPlayer != null) {
+            nextPlayer.pause();
+        }
     }
 
     public void resume() {
+        this.stopplaying = false;
         currentPlayer.start();
     }
 
@@ -124,9 +140,10 @@ public class GaplessAudioLoopPlugin implements MethodCallHandler {
             int id = GaplessAudioLoopPlugin.id;
 
             String url = call.argument("url");
-            double volume = call.argument("volume");
+            double volumeleft = call.argument("volumeleft");
+            double volumeright = call.argument("volumeright");
 
-            GaplessPlayer player = new GaplessPlayer(url, volume);
+            GaplessPlayer player = new GaplessPlayer(url, volumeleft, volumeright);
             players.put(id, player);
 
             GaplessAudioLoopPlugin.id++;
@@ -154,10 +171,11 @@ public class GaplessAudioLoopPlugin implements MethodCallHandler {
             }
         } else if (call.method.equals("setVolume")) {
             GaplessPlayer player = getPlayer(call);
-            double volume = call.argument("volume");
+            double volumeleft = call.argument("volumeleft");
+            double volumeright = call.argument("volumeright");
 
             if (player != null) {
-                player.setVolume(volume);
+                player.setVolume(volumeleft, volumeright);
             }
         } else if (call.method.equals("seek")) {
             GaplessPlayer player = getPlayer(call);

@@ -105,21 +105,21 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Text("0.2"),
                   onPressed: () {
                     if (_player != null) {
-                      _player.setVolume(0.2);
+                      _player.setVolume(0.2, .2);
                     }
                   }),
               RaisedButton(
                   child: Text("0.5"),
                   onPressed: () {
                     if (_player != null) {
-                      _player.setVolume(0.5);
+                      _player.setVolume(0.5, .5);
                     }
                   }),
               RaisedButton(
                   child: Text("1.0"),
                   onPressed: () {
                     if (_player != null) {
-                      _player.setVolume(1.0);
+                      _player.setVolume(1.0, 1.0);
                     }
                   }),
             ]),
