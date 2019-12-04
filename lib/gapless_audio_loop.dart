@@ -64,6 +64,19 @@ class GaplessAudioLoop {
     }
   }
 
+  Future<void> playLR(double volumeleft, double volumeright) async {
+    assert(_loadedFile != null, 'File is not loaded');
+
+    _volumeleft = volumeleft;
+    _volumeright = volumeright;
+
+    // Do nothing when it  is already playing
+    if (_id == null) {
+      _id = await _channel
+          .invokeMethod("play", {'url': _loadedFile, 'volumeleft': _volumeleft, 'volumeright': _volumeright});
+    }
+  }
+
   Future<void> pause() async {
     assert(_id != null, 'Loop is not playing');
 
